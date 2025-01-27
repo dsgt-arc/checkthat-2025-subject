@@ -1,0 +1,39 @@
+name: checkthat-subjectivity
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - sentence-transformers
+  - scikit-learn
+  - pip
+  - pip:
+      - matplotlib
+      - huggingface-hub
+      - networkx
+      - tf-keras
+      - numpy
+      - pandas
+      - pillow
+      - pytz
+      - requests
+      - seaborn
+      - safetensors
+      - scipy
+      - tokenizers
+      - torch
+      - tqdm
+      - transformers
+      - tensorflow
+      - git+https://github.com/huggingface/transformers
+      - "distilabel[vllm]>=1.5.2"
+      - tiktoken
+      - ipykernel
+      - tqdm
+      - unidecode
+
+      # developer tools
+      - jupyterlab
+      - ruff
+      - pre-commit
+      - pytest
