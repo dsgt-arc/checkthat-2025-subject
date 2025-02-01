@@ -3,6 +3,9 @@ from distilabel.models import vLLM
 from distilabel.pipeline import Pipeline
 from distilabel.steps.tasks import TextGeneration
 
+from helper.logger import set_up_log
+
+
 
 prompt_template = """\
 You will be given a problem. Please reason step by step, and put your final answer within \boxed{}:
@@ -39,5 +42,7 @@ with Pipeline(
 
 
 if __name__ == "__main__":
+
+    set_up_log()
     distiset = pipeline.run(dataset=dataset)
     distiset.push_to_hub(repo_id="username/numina-deepseek-r1-qwen-7b")

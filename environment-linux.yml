@@ -4,36 +4,30 @@ channels:
   - defaults
 dependencies:
   - python
-  - sentence-transformers
+  - ipykernel
+  - rerankers
+  - matplotlib
   - scikit-learn
+  - networkx
+  - numpy
+  - pandas
+  - polars
+  - pillow
+  - pytz
+  - requests
+  - safetensors
+  - scikit-learn
+  - scipy
+  - sentence-transformers
+  - seaborn
+  - tokenizers
+  - tqdm
+  - tiktoken
+  - ruff
   - pip
+  - pacmap
+  - umap-learn
   - pip:
-      - matplotlib
-      - huggingface-hub
-      - networkx
-      - tf-keras
-      - numpy
-      - pandas
-      - pillow
-      - pytz
-      - requests
-      - seaborn
-      - safetensors
-      - scipy
-      - tokenizers
-      - torch
-      - tqdm
-      - transformers
-      - tensorflow
-      - git+https://github.com/huggingface/transformers
-      - "distilabel[vllm]>=1.5.2"
-      - tiktoken
-      - ipykernel
-      - tqdm
-      - unidecode
-
-      # developer tools
-      - jupyterlab
-      - ruff
-      - pre-commit
-      - pytest
+    - transformers
+    - torch
+    - huggingface-hub

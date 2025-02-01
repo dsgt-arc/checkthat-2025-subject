@@ -1,0 +1,27 @@
+data:
+  dir: "/storage/coda1/p-dsgt_clef2025/0/shared/checkthat-2025-numerical-data"
+  train_claims_quantemp: "raw_data/train_claims_quantemp.json"
+  train_claims_embedding: "embeddings/train_claims_embed"
+
+encoder_model: 
+  name: "answerdotai/ModernBERT-base"
+  add_special_tokens: true
+  padding: "max_length"
+  truncation: true
+  return_attention_mask: true
+  return_tensors: "pt"
+  pad_to_max_length: true
+  max_length: 128
+  batch_size: 20
+
+dim_red_model: 
+  name: "umap"
+  n_neighbors: 15
+  n_components: 2
+  metric: euclidean
+  random_state: 42
+
+visualization:
+  fig_dir: "/storage/coda1/p-dsgt_clef2025/0/shared/checkthat-2025-numerical-data/fig"
+  data_type: "png"
+  figure_size: [6, 6]

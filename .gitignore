@@ -1,2 +1,16 @@
-/data
+data/
+*.DS_Store
+__pycache__/
+model_weights
+*.pt
+test-modernbert/
+*.pyc
+pyterrier_index/
+output/
+.flashrank_cache/
+log/
+*.log
+fig/
+*.out
+*.npy
 /.vscode
