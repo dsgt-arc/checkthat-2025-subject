@@ -1,7 +1,7 @@
 data:
-  dir: "/storage/coda1/p-dsgt_clef2025/0/shared/checkthat-2025-numerical-data"
-  train_claims_quantemp: "raw_data/train_claims_quantemp.json"
-  train_claims_embedding: "embeddings/train_claims_embed"
+  dir: "/storage/coda1/p-dsgt_clef2025/0/shared/checkthat-2025-subjectiv-data"
+  train_en: "raw_data/english/train_en.tsv"
+  train_en_embedding: "embeddings/english/train_en_embed"
 
 encoder_model: 
   name: "answerdotai/ModernBERT-base"
@@ -22,6 +22,6 @@ dim_red_model:
   random_state: 42
 
 visualization:
-  fig_dir: "/storage/coda1/p-dsgt_clef2025/0/shared/checkthat-2025-numerical-data/fig"
+  fig_dir: "/storage/coda1/p-dsgt_clef2025/0/shared/checkthat-2025-subjectiv-data/fig"
   data_type: "png"
   figure_size: [6, 6]
