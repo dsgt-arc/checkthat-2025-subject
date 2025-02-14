@@ -26,8 +26,8 @@ def init_args_parser() -> argparse.Namespace:
 
     return parser.parse_args()
 
-
-max_train_features_length = max([len(f) for f in train_features])
+# TODO: length for tokenizer
+#max_train_features_length = max([len(f) for f in train_features])
 
 
 def check_data_availability(path: Path) -> bool:
@@ -35,7 +35,7 @@ def check_data_availability(path: Path) -> bool:
     return path.exists()
 
 
-def read_train_and_val_data(rc: RunConfig) -> pl.DataFrame:
+def read_train_and_val_data(rc: RunConfig) -> tuple[pl.DataFrame, pl.DataFrame | None]:
     """Read train and validation data."""
     logging.info(f"Reading train and validation data from '{rc.data['train_en']}' and '{rc.data['val_en']}'.")
 
@@ -43,13 +43,29 @@ def read_train_and_val_data(rc: RunConfig) -> pl.DataFrame:
     ds.read_csv_data(rc.data["train_en"], separator="\t")
     df_train = ds.get_data()
 
-    ds.read_csv_data(rc.data["val_en"], separator="\t")
-    df_val = ds.get_data()
+    if rc.data["val_en"] is None:
+        logging.info("No validation data available. Need to split train.")
+        df_val = None
+    else:
+        ds.read_csv_data(rc.data["val_en"], separator="\t")
+        df_val = ds.get_data()
 
     return df_train, df_val
 
+def train_val_split(df: pl.DataFrame, rc: RunConfig) -> tuple[pl.DataFrame, pl.DataFrame]:
+    """Split data into train and validation set."""
+    split_ratio = rc.data["train_test_split"]
+    logging.info(f"Splitting data with ratio '{split_ratio}'.")
+    # Shuffle the DataFrame
+    df = df.sample(fraction=1.0, shuffle=True, seed=rc.encoder_model['seed'])
+    # Compute split index
+    split_idx = int(split_ratio * df.height)
+    # Train/Test split
+    df_train = df.slice(0, split_idx)
+    df_val = df.slice(split_idx, df.height - split_idx)
+    return df_train, df_val
 
-def encode_labels(df_train: pl.DataFrame, df_val: pl.DataFrame) -> pl.DataFrame:
+def encode_labels(df_train: pl.DataFrame, df_val: pl.DataFrame) -> tuple[pl.DataFrame, pl.DataFrame]:
     """Encode labels."""
     LE = LabelEncoder()
 
@@ -138,6 +154,12 @@ def main() -> int:
         rc.load_config()
 
         df_train, df_val = read_train_and_val_data(rc)
+        if df_val is None:
+            # Split train data
+            split_ratio = rc.data["train_test_split"]
+            logging.info(f"Splitting train data with ratio '{split_ratio}'.")
+            df_train, df_val = train_val_split(df_train, rc)
+
         df_train, df_val = encode_labels(df_train, df_val)
         num_classes = len(df_train["label"].unique())
 

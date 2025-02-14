@@ -13,7 +13,7 @@ dependencies:
       - networkx
       - tf-keras
       - numpy
-      - pandas
+      - polars
       - pillow
       - pytz
       - requests
@@ -30,8 +30,6 @@ dependencies:
       - ipykernel
       - tqdm
       - unidecode
-      - pyspark>=3.4.0
-      - pyarrow
       # developer tools
       - jupyterlab
       - ruff
