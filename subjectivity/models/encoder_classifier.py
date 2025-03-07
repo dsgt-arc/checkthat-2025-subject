@@ -35,7 +35,7 @@ class Classifier(nn.Module):
         )
 
         if freeze_encoder:
-            logging.info(f"Freezing {self.encoder.__class__.name} Encoder layers")
+            logging.info(f"Freezing {self.encoder.__class__.__name__} Encoder layers")
             for param in self.encoder.parameters():
                 param.requires_grad = False
 
@@ -43,6 +43,7 @@ class Classifier(nn.Module):
         self.to(self.device)
         logging.info(f"Using device: '{self.device}'.")
 
+    # passing data and training
     def forward(self, tokens, masks):
         output = self.encoder(tokens, attention_mask=masks)
         cls_embedding = output.last_hidden_state[:, 0, :]  # Shape: [batch_size, hidden_dim]

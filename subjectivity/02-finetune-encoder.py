@@ -1,5 +1,7 @@
 import polars as pl
 from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import f1_score
+
 from pathlib import Path
 import logging
 import argparse
@@ -155,6 +157,11 @@ def accuracy_fn(preds: torch.Tensor, labels: torch.Tensor) -> float:
     preds = torch.argmax(torch.nn.functional.softmax(preds, dim=1), dim=1)
     return (preds == labels).float().mean().item()
 
+# measures macro-f1 score = 2 * ((precision * recall)/(precision + recall))
+def macro_f1_fn(preds: torch.Tensor, labels: torch.Tensor) -> float:
+    preds = torch.argmax(torch.nn.functional.softmax(preds, dim=1), dim=1)
+    return f1_score(labels.cpu().numpy(), preds.cpu().numpy(), average="macro")
+
 
 def train(
     model: torch.nn.Module,
@@ -227,7 +234,7 @@ def train(
         if metric_fn:
             metric_value = metric_fn(torch.cat(all_preds), torch.cat(all_labels))
             logging.info(
-                f"Epoch {epoch + 1}: Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}, Metric: {metric_value:.4f}"
+                f"Epoch {epoch + 1}: Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}, Metric(F1): {metric_value:.4f}"
             )
         else:
             logging.info(f"Epoch {epoch + 1}: Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}")
@@ -266,10 +273,16 @@ def main() -> int:
         df_train, df_val = encode_labels(df_train, df_val)
         num_classes = len(df_train["label"].unique())
 
-        # Load encoder classifer to fine-tune if not already fine-tuned
-        # TODO: Do we need this?
+        # Load encoder classifier to fine-tune if not already fine-tuned
+        # Modify model_path to save in checkthat-2025-subject/fine_tuned_models
         encoder_model_name = rc.encoder_model["name"]
+        #model_path = Path("fine_tuned_models") / Path(encoder_model_name.replace("/", "-") + '-classifier')
         model_path = Path(rc.data['dir']) / Path(rc.data['fine_tuned_model_path'] + encoder_model_name.replace("/", "-") + '-classifier' + '.pth') 
+       
+
+        # Ensure the directory exists before saving
+        model_path.parent.mkdir(parents=True, exist_ok=True)
+
         if check_data_availability(model_path) & (not args.force):
             logging.info(f"Weights of model '{encoder_model_name}' already exist in '{model_path}'. Loading.")
             model = Classifier.load(model_path)
@@ -283,16 +296,14 @@ def main() -> int:
                 mlp_dim=rc.encoder_model["mlp_dim"],
             )
 
-        # Use tokenizer of model to prepare data furhter and load into dataloaders
+        # Tokenization and DataLoader setup
         train_input_ids, val_input_ids, train_masks, val_masks = tokenize_data(model, df_train, df_val, rc)
         train_dataloader, val_dataloader = set_up_dataloaders(
             rc.train["batch_size"], rc.train["seed"], train_input_ids, val_input_ids, train_masks, val_masks, df_train, df_val
         )
 
-        # Set up optimizer
+        # Optimizer and loss function
         optimizer, scheduler = set_up_optimizer(model, rc.train["learning_rate"], rc.train["eps"], rc.train["epochs"])
-
-        # Set up loss function
         loss = torch.nn.CrossEntropyLoss()
 
         # Train model
@@ -301,21 +312,22 @@ def main() -> int:
             optimizer=optimizer,
             scheduler=scheduler,
             loss=loss,
-            metric_fn=accuracy_fn,
+            metric_fn=macro_f1_fn,
             train_dataloader=train_dataloader,
             val_dataloader=val_dataloader,
             epochs=rc.train["epochs"],
             early_stopping_patience=rc.train["early_stopping_patience"],
         )
 
-        # Save weights of fine-tuned model
+        # Save model weights
         best_model.save(model_path)
 
-        logging.info("Finished fine-tuning.")
+        logging.info(f"Finished fine-tuning. Model saved at {model_path}")
         return 0
     except Exception:
         logging.exception("Fine-Tuning failed", stack_info=True)
         return 1
+
 
 
 main()
