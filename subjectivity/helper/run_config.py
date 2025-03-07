@@ -11,6 +11,7 @@ class RunConfig:
     encoder_model: dict = field(default_factory=dict)
     dim_red_model: dict = field(default_factory=dict)
     visualization: dict = field(default_factory=dict)
+    train: dict = field(default_factory=dict)
 
     def load_config(self) -> None:
         """Load YAML config into a RunConfig object."""
@@ -21,3 +22,4 @@ class RunConfig:
         self.encoder_model=config_data.get("encoder_model")
         self.dim_red_model=config_data.get("dim_red_model")
         self.visualization=config_data.get("visualization")
+        self.train=config_data.get("train")
