@@ -148,7 +148,7 @@ def set_up_optimizer(
     model, learning_rate: float, eps: float, epochs: int
 ) -> tuple[optim.Optimizer, optim.lr_scheduler.LRScheduler]:
     """Set up optimizer."""
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate, eps=eps)
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, eps=eps)
     scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: 1 - epoch / epochs)
     return optimizer, scheduler
 
