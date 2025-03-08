@@ -1,5 +1,5 @@
 data:
-  dir: /Users/maximilianheil/OMSCS/07_CLEF/Task1/checkthat-2025-subject/data
+  dir: Users/maximilianheil/OMSCS/07_CLEF/Task1/checkthat-2025-subject/data
   train_en: raw_data/english/train_en.tsv
   train_en_embedding: embeddings/english/train_en_embed
   fine_tuned_model_path: fine_tuned_models/english
@@ -8,14 +8,14 @@ data:
 train:
   train_test_split: 0.8
   batch_size: 40
-  seed: 42
+  seed: 100
   epochs: 10
   learning_rate: 0.0001
   eps: 0.00000001
   early_stopping_patience: 3
 
 encoder_model:
-  name: "sentence-transformers/all-MiniLM-L6-v2"
+  name: "answerdotai/ModernBERT-base"
   add_special_tokens: true
   padding: "max_length"
   truncation: true
@@ -24,7 +24,7 @@ encoder_model:
   pad_to_max_length: true
   max_length: 128
   batch_size: 20
-  hidden_dim: 384
+  hidden_dim: 768
   freeze_encoder: false
   dropout_ratio: 0.1
   mlp_dim: 256

@@ -1,21 +1,21 @@
 data:
-  dir: /Users/maximilianheil/OMSCS/07_CLEF/Task1/checkthat-2025-subject/data
+  dir: Users/maximilianheil/OMSCS/07_CLEF/Task1/checkthat-2025-subject/data
   train_en: raw_data/english/train_en.tsv
   train_en_embedding: embeddings/english/train_en_embed
   fine_tuned_model_path: fine_tuned_models/english
   val_en: raw_data/english/dev_en.tsv
 
 train:
-  train_test_split: 0.8
-  batch_size: 40
+  train_test_split: 0.9
+  batch_size: 120
   seed: 42
-  epochs: 10
+  epochs: 7
   learning_rate: 0.0001
   eps: 0.00000001
   early_stopping_patience: 3
 
-encoder_model:
-  name: "sentence-transformers/all-MiniLM-L6-v2"
+encoder_model: 
+  name: "MarieAngeA13/Sentiment-Analysis-BERT"
   add_special_tokens: true
   padding: "max_length"
   truncation: true
@@ -24,8 +24,8 @@ encoder_model:
   pad_to_max_length: true
   max_length: 128
   batch_size: 20
-  hidden_dim: 384
-  freeze_encoder: false
+  hidden_dim: 768
+  freeze_encoder: false  #try true/false (true: just finetuning classifier on top of encoder / false: finetuning classifier + encoder)
   dropout_ratio: 0.1
   mlp_dim: 256
 
