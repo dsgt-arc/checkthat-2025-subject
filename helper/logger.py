@@ -61,7 +61,7 @@ def set_up_log(log_level: int = None, suffix: str = None) -> None:
     log_file_path = Path(f"log/{suffix}.log")
     if not log_file_path.parent.exists():
         log_file_path.parent.mkdir()
-    log_format = "%(asctime)s | %(levelname)s | %(module)s |  %(extra_info)s | %(message)s"
+    log_format = "%(asctime)s | %(levelname)s | %(module)s | %(message)s"
 
     if log_level is None:
         log_level = 20
