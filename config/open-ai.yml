@@ -1,7 +1,7 @@
 data:
   dir: "/storage/coda1/p-dsgt_clef2025/0/shared/checkthat-2025-subjectiv-data"
   train: "raw_data/english/train_en.tsv"
-  train_pred: "raw_data/english/train_predictions_en.tsv"
+  train_pred: "raw_data/english/train_classifications_en.tsv"
 
 llm:
   save_every: 20
@@ -16,11 +16,11 @@ llm:
     presence_penalty: 0.0,
     max_retries: 3,
   }
-  few_shot: false
+  few_shot: true
   few_shot_seed: 42
   prompt: {
     system: You are a helpful assistant that classifies sentences as 'SUBJ' (subjective) or 'OBJ' (objective).,
-    assistance: null,
+    assistance: "Example sentences and their labels: 'This is a subjective statement.' → SUBJ, 'This fact is scientifically proven.' → OBJ.",
     user: "Classify the following sentence as either 'SUBJ' (subjective) or 'OBJ' (objective). Respond with a single word: SUBJ or OBJ. Sentence: {sentence}"
   }
   round_results: 4
