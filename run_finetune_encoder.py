@@ -10,7 +10,7 @@ from subjectivity.helper.data_store import read_all_data
 from subjectivity.helper.logger import set_up_log
 from subjectivity.helper.run_config import RunConfig
 from subjectivity.helper.util import check_data_availability
-from subjectivity.helper.metrics import FocalLoss, accuracy_fn, macro_f1_fn, reweight, compute_class_report
+from subjectivity.helper.metrics import FocalLoss, accuracy_fn, macro_f1_fn, reweight
 from subjectivity.helper.tracking import track_with_wandb
 from subjectivity.helper.train import (
     compute_token_stats,
@@ -33,6 +33,14 @@ def init_args_parser() -> argparse.Namespace:
         default=False,
         action="store_true",
         help="Force recomputation of embedding",
+    )
+    parser.add_argument(
+        "--test-without-labels",
+        "-two",
+        dest="two",
+        default=False,
+        action="store_true",
+        help="Using test data without labels",
     )
 
     return parser.parse_args()
@@ -62,7 +70,9 @@ def main() -> int:
 
         df_train, df_val, df_test = read_all_data()
 
-        df_train, df_val, df_test = encode_labels(df_train), encode_labels(df_val), encode_labels(df_test)
+        df_train, df_val = encode_labels(df_train), encode_labels(df_val)
+        if not args.two:
+            df_test = encode_labels(df_test)
         num_classes = len(df_train["label"].unique())
         logging.info(f"Number of classes: {num_classes}")
 
@@ -125,7 +135,8 @@ def main() -> int:
             test_masks,
             df_train,
             df_val,
-            df_test
+            df_test,
+            test_wo_labels=args.two,
         )
 
         num_batchs = len(train_dataloader)
@@ -159,7 +170,7 @@ def main() -> int:
             raise ValueError(f"Loss function '{RunConfig.train['loss']}' not supported.")
 
         # Train and track with wandb
-        best_model, test_score, test_predictions = track_with_wandb(
+        best_model, best_score, test_predictions = track_with_wandb(
             train_fn=train,
             run_name=run_name,
             model=model,
@@ -170,6 +181,7 @@ def main() -> int:
             train_dataloader=train_dataloader,
             val_dataloader=val_dataloader,
             test_dataloader=test_dataloader,
+            test_wo_labels=args.two,
             device=device,
             epochs=RunConfig.train["epochs"],
             early_stopping_patience=RunConfig.train["early_stopping_patience"],
@@ -188,22 +200,29 @@ def main() -> int:
             best_model.save(model_path)
         logging.info(f"Saving tokenizer to {tokenizer_path}.")
         tokenizer.save(tokenizer_path)
-        logging.info(f"Finished fine-tuning with test macro-avg f1: {test_score}.")
+        logging.info(f"Finished fine-tuning with best val macro-avg f1: {best_score}.")
 
         # Save test_predictions
         df_test_with_predicted_labels = df_test.with_columns(pl.Series(test_predictions).alias("predicted_label"))
+        # Reformat for submission
+        df_test_with_predicted_labels = df_test_with_predicted_labels.with_columns(
+            pl.col("predicted_label").alias("label"),
+        ).select(
+            pl.col("sentence_id"),
+            pl.col("label"),
+        )
 
         df_test_with_preds_path = (
             Path(RunConfig.data["dir"])
             / Path(RunConfig.data["fine_tuned_model_path"])
             / Path(run_name)
-            / Path("df_test_with_preds.xlsx")
+            / (Path("task1_dev_mono_english.tsv") if not args.two else Path("task1_test_mono_english.tsv"))
         )
-        logging.info(f"Saving df_test_with_preds to {df_test_with_preds_path}.")
-        df_test_with_predicted_labels.write_excel(df_test_with_preds_path)
+        logging.info(f"Saving task1_..._mono_english.tsv to {df_test_with_preds_path}.")
+        df_test_with_predicted_labels.write_csv(df_test_with_preds_path, separator="\t", include_header=True)
         logging.info("Finished!")
 
-        return test_score
+        return best_score
 
     except Exception:
         if torch.cuda.is_available():

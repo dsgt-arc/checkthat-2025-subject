@@ -28,9 +28,9 @@ def track_with_wandb(train_fn: Callable, *, run_name: str, **kwargs) -> tuple[to
 
     kwargs["log_fn"] = wandb.log  # 👈 Add logging to each epoch
 
-    model, test_macro_f1, test_predictions = train_fn(**kwargs)
+    model, best_macro_f1, test_predictions = train_fn(**kwargs)
 
-    wandb.log({"test/macro_f1": test_macro_f1})
+    wandb.log({"val/macro_f1": best_macro_f1})
     wandb.finish()
 
-    return model, test_macro_f1, test_predictions
+    return model, best_macro_f1, test_predictions

@@ -156,31 +156,4 @@ class FocalLoss(torch.nn.Module):
         self.weight = weight
 
     def forward(self, input, target):
-        """
-        :param input: input predictions
-        :param target: labels
-        :return: tensor of focal loss in scalar
-        """
-        loss = None
-
-        # Compute softmax over the input predictions
-        softmax_probs = torch.nn.functional.softmax(input, dim=1)
-
-        # Gather the probabilities for the correct class for each sample
-        gather_indices = target.view(-1, 1)
-        probs = torch.gather(softmax_probs, 1, gather_indices).squeeze()
-
-        # Compute the loss component for each sample
-        focal_term = (1.0 - probs) ** self.gamma
-
-        log_probs = torch.log(probs)
-
-        if self.weight is not None:
-            alpha = self.weight[target]
-            loss = -alpha * focal_term * log_probs
-        else:
-            loss = -focal_term * log_probs
-
-        loss = loss.mean()
-
-        return loss
+        pass

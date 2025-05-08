@@ -122,6 +122,7 @@ def set_up_dataloaders(
     df_train: pl.DataFrame,
     df_val: pl.DataFrame,
     df_test: pl.DataFrame,
+    test_wo_labels: bool = False,
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
     """Set up dataloaders."""
 
@@ -132,14 +133,17 @@ def set_up_dataloaders(
 
     logging.info(f"Setting up dataloaders for training with '{num_workers}' num_workers.")
 
+    # Wrapping into TensorDataset so that each sample will be retrieved by indexing tensors along the first dimension
     train_labels = torch.tensor(df_train["label_encoded"])
     val_labels = torch.tensor(df_val["label_encoded"])
-    test_labels = torch.tensor(df_test["label_encoded"])
-
-    # Wrapping into TensorDataset so that each sample will be retrieved by indexing tensors along the first dimension
     train_dataset = TensorDataset(train_input_ids, train_masks, train_labels)
     val_dataset = TensorDataset(val_input_ids, val_masks, val_labels)
-    test_dataset = TensorDataset(test_input_ids, test_masks, test_labels)
+    if not test_wo_labels:
+        test_labels = torch.tensor(df_test["label_encoded"])
+        test_dataset = TensorDataset(test_input_ids, test_masks, test_labels)
+    else:
+        test_dataset = TensorDataset(test_input_ids, test_masks)
+
 
     # Set a seed for reproducibility in random sampler generation
     generator = torch.Generator().manual_seed(seed)
@@ -199,6 +203,7 @@ def train(
     val_dataloader: DataLoader,
     test_dataloader: DataLoader,
     device: torch.device,
+    test_wo_labels: bool = False,
     epochs: int = 100,
     early_stopping_patience: int = 5,
     log_fn: Callable[[dict], None] | None = None,
@@ -341,23 +346,23 @@ def train(
     logging.info(f"Training complete. Duration: {elapsed_training_time}. Best macro-F1 fine-tuning validation: {best_macro_f1:.4f}")
 
     # Predict dev test data given best model
-    test_predictions, test_labels = predict_test_data(test_dataloader, model, device)
-    test_metrics_value = {metric_name: metric_fn(test_predictions, test_labels) for metric_name, metric_fn in metric_fns.items()}
-
-    test_labels_decoded = decode_labels(test_labels)
+    test_predictions, test_labels = predict_test_data(test_dataloader, model, device, test_wo_labels)
     test_predictions_decoded = decode_labels(torch.argmax(test_predictions, dim=1))
-    test_classification_report = compute_class_report(test_predictions_decoded, test_labels_decoded)
-    logging.info(f"Test classification report: {test_classification_report}")
+    if not test_wo_labels:
+        test_metrics_value = {metric_name: metric_fn(test_predictions, test_labels) for metric_name, metric_fn in metric_fns.items()}
+        test_labels_decoded = decode_labels(test_labels)
+        test_classification_report = compute_class_report(test_predictions_decoded, test_labels_decoded)
+        logging.info(f"Test classification report: {test_classification_report}")
 
-    if log_fn:
-        log_fn(
-            {
-                "test/OBJ_class_f1": test_classification_report.filter(pl.col("category") == "OBJ")["f1-score"][0],
-                "test/SUBJ_class_f1": test_classification_report.filter(pl.col("category") == "SUBJ")["f1-score"][0],
-            }
-        )
+        if log_fn:
+            log_fn(
+                {
+                    "test/OBJ_class_f1": test_classification_report.filter(pl.col("category") == "OBJ")["f1-score"][0],
+                    "test/SUBJ_class_f1": test_classification_report.filter(pl.col("category") == "SUBJ")["f1-score"][0],
+                }
+            )
 
-    return model, test_metrics_value["macro_f1"], test_predictions_decoded
+    return model, best_macro_f1, test_predictions_decoded
 
 
 def compute_token_stats(train_input_ids: torch.Tensor, val_input_ids: torch.Tensor, test_input_ids: torch.Tensor) -> None:
