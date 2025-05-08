@@ -1,37 +1,6 @@
-name: checkthat-subjectivity
+name: checkthat-subjectivity-tf
 channels:
   - conda-forge
   - defaults
 dependencies:
   - python==3.11
-  - sentence-transformers
-  - scikit-learn
-  - pip
-  - pip:
-      - matplotlib
-      - huggingface-hub
-      - networkx
-      - tf-keras
-      - numpy
-      - polars
-      - pillow
-      - pytz
-      - requests
-      - seaborn
-      - safetensors
-      - scipy
-      - tokenizers
-      - torch
-      - tqdm
-      - transformers
-      - tensorflow
-      - git+https://github.com/huggingface/transformers
-      - tiktoken
-      - ipykernel
-      - tqdm
-      - unidecode
-      # developer tools
-      - jupyterlab
-      - ruff
-      - pre-commit
-      - pytest

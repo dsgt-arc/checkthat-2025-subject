@@ -149,6 +149,6 @@ def main(train_path, test_path) -> None:
 
 if __name__ == '__main__':
     train_path = 'data/raw_data/english/train_en.tsv'
-    test_path = 'data/raw_data/english/dev_en.tsv'
+    test_path = 'data/raw_data/english/dev_test_en.tsv'
 
     main(train_path, test_path)

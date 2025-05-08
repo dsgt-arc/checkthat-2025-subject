@@ -16,7 +16,6 @@ dependencies:
   - pytz
   - requests
   - safetensors
-  - scikit-learn
   - scipy
   - sentence-transformers
   - seaborn
@@ -27,6 +26,7 @@ dependencies:
   - pip
   - pacmap
   - umap-learn
+  - langchain
   - pip:
     - transformers
     - torch

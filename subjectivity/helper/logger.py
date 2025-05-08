@@ -1,5 +1,4 @@
 import logging
-import logging.config
 import sys
 from pathlib import Path
 import datetime
@@ -26,6 +25,10 @@ def get_system_info() -> str:
         gpu_usage = torch.cuda.memory_allocated(0) / gpu.total_memory * 100
         # Assuming GPU name length varies, but CPU and MEM are fixed
         gpu_str = f" | GPU: {gpu.name}, GPU Usage: {gpu_usage:6.2f}%"
+    elif torch.backends.mps.is_available():
+        gpu_usage = torch.mps.current_allocated_memory() / torch.mps.recommended_max_memory() * 100
+        # Assuming GPU name length varies, but CPU and MEM are fixed
+        gpu_str = f" | GPU: mps, GPU Usage: {gpu_usage:6.2f}%"
     else:
         gpu_str = ""
 

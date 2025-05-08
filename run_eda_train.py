@@ -5,12 +5,12 @@ from pathlib import Path
 import logging
 import argparse
 
-from helper.logger import set_up_log
-from models.encoder import EncoderModel
-from helper.data_store import DataStore
-from models.dim_red import DimRed
-from helper.visualization import Visualization
-from helper.run_config import RunConfig
+from subjectivity.helper.logger import set_up_log
+from subjectivity.models.encoder import EncoderModel
+from subjectivity.helper.data_store import DataStore
+from subjectivity.models.dim_red import DimRed
+from subjectivity.helper.visualization import Visualization
+from subjectivity.helper.run_config import RunConfig
 
 def init_args_parser() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Embedding Training Data Visualization")

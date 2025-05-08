@@ -4,7 +4,8 @@ data:
   train_en_embedding: embeddings/english/train_en_embed
   fine_tuned_model_path: fine_tuned_models/english
   val_en: raw_data/english/dev_en.tsv
-  test_en: raw_data/english/dev_test_en.tsv
+  test_en: raw_data/english/test_en_unlabeled.tsv
+  dev_pred_en: raw_data/english/dev_pred_en.tsv
 
 train:
   train_test_split: 0.8
