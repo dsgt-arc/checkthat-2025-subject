@@ -3,7 +3,7 @@ data:
   train_en: raw_data_2024/english/train_en.tsv 
   train_en_embedding: embeddings/english/train_en_embed
   fine_tuned_model_path: fine_tuned_models/english
-  val_en: raw_data_2024/english/test_en_gold.tsv
+  val_en: raw_data_2024/english/dev_en.tsv
 
 train:
   train_test_split: 0.9
