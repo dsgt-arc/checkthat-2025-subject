@@ -1,0 +1,159 @@
+data:
+  #dir: "/storage/coda1/p-dsgt_clef2025/0/shared/checkthat-2025-subjectiv-data"
+  #train: "raw_data/english/train_en.tsv"
+  #train_pred: "raw_data/english/train_sample_generated_en.tsv"
+  dir: "./temp_pace"
+  train: "data/train_en.tsv"
+  #train: "data/sample/train_sample.tsv"
+  train_pred: "data/train_generated_2obj2subj_en.tsv"
+
+llm:
+  provider: openai
+  class_name: ChatOpenAI
+
+  # prompt
+  prompt:
+    system: |
+      You’re a linguistic-transformation expert.
+      • For SUBJ→OBJ: strip opinions/emotion, keep facts.
+      • For OBJ→SUBJ: add the requested style, preserve the original subject matter.
+      • If the source is already in the style, rephrase it.
+      • Make each output lexically and structurally distinct from outputs in other styles.
+      • Never repeat the same sentence structure or phrase across different styles.
+      • Output exactly one sentence.
+      Respond only with the converted line, without any label prefix.
+
+  # model defaults
+  model_config:
+    model_name: gpt-4o-mini
+    temperature: 0.2        # will be overridden per style
+    max_tokens: 100
+    top_p: 0.9
+    frequency_penalty: 0.8
+    presence_penalty: 0.8
+    max_retries: 3
+
+  # few-shot examples
+  ## anchor the example blocks so we can reuse them
+  subj_to_obj_examples: &ex_subj_to_obj |
+    Subjective: "Corrupt politicians ruined our schools"
+    Objective: "Funding for public education decreased over the last decade"
+    ---
+    Subjective: "Outrageous delays leave commuters furious"
+    Objective: "Train services were delayed by an average of 45 minutes this week"
+    ---
+    Subjective: "Heartless policies devastate low-income families"
+    Objective: "New policies reduced access to housing assistance for low-income households"
+    ---
+    Subjective: "Negligent officials turned a blind eye to the disaster"
+    Objective: "Officials did not respond to the disaster until three days after it occurred"
+
+  obj_to_subj_examples:
+    emotional: &ex_emotional |
+      Objective: "Unemployment rose by 3%"
+      Emotional: "Families across the country face heartbreaking uncertainty as jobs disappear"
+      ---
+      Objective: "Rent prices increased in urban areas"
+      Emotional: "Struggling tenants watch helplessly as rent soars beyond reach"
+      ---
+      Objective: "Floodwaters reached residential areas"
+      Emotional: "Terrified families fled as floodwaters engulfed their homes"
+
+    propaganda: &ex_propaganda |
+      Objective: "Military budget increased by 5%"
+      Propaganda: "Our great nation fortifies its defenses to protect freedom and peace"
+      ---
+      Objective: "New tax reform bill introduced"
+      Propaganda: "Visionary leadership paves the way to prosperity with bold tax reforms"
+      ---
+      Objective: "National security policy revised"
+      Propaganda: "A renewed commitment to our citizens' safety shines through every policy update"
+
+    prejudices: &ex_prejudices |
+      Objective: "Vaccination rates vary"
+      Prejudices: "Some groups still refuse vaccines, dragging down progress for everyone else"
+      ---
+      Objective: "Teacher shortages persist"
+      Prejudices: "Affluent suburbs snatch up the best teachers, while poorer districts are left with the scraps"
+      ---
+      Objective: "Crime declined slightly"
+      Prejudices: "They say crime is down, but ignore the real mess happening in inner-city neighborhoods"
+      ---
+      Objective: "New housing policy enacted"
+      Prejudices: "Of course, it only benefits landlords and developers — not the working class"
+
+    partisan: &ex_partisan |
+      Objective: "Federal subsidies were reallocated in 2023"
+      Partisan: "Another power grab by the administration to push their elite-friendly agenda"
+      ---
+      Objective: "Education funding was modified"
+      Partisan: "This is just more of the same from conservatives slashing public schools"
+      ---
+      Objective: "New regulations passed for tech companies"
+      Partisan: "Democrats once again kowtow to Big Tech under the guise of reform"
+
+    derogatory: &ex_derogatory |
+      Objective: "City planning board approved a new zoning plan"
+      Derogatory: "The brain trust at city hall rubber-stamped yet another disaster-in-the-making"
+      ---
+      Objective: "Recycling efforts fell short of goals"
+      Derogatory: "People still can’t figure out how to sort their trash without screwing it up"
+      ---
+      Objective: "Public transportation upgrades delayed again"
+      Derogatory: "Same old story—bureaucrats can’t do anything on time or on budget"
+
+    exaggerated: &ex_exaggerated |
+      Objective: "Heatwave temperatures exceeded 100°F"
+      Exaggerated: "The sun turned the streets into molten rivers of fire!"
+      ---
+      Objective: "Internet outages affected the city"
+      Exaggerated: "The city was plunged into a digital black hole—total chaos!"
+      ---
+      Objective: "Traffic congestion increased"
+      Exaggerated: "Commuters trapped for eternity in an ocean of bumper-to-bumper misery!"
+  
+
+  # paraphrasing configurations
+  subj_to_obj:
+    num_paraphrases: 2
+    temperature: 0.85
+    examples: *ex_subj_to_obj
+
+  obj_to_subj:
+    num_paraphrases: 1
+    styles: [ emotional, propaganda, prejudices, partisan, derogatory, exaggerated ]
+
+    # DRY defaults
+    style_defaults: &style_defaults
+      temperature: 0.8
+
+    style_configs:
+      emotional:
+        <<: *style_defaults
+        temperature: 0.75
+        examples: *ex_emotional
+
+      propaganda:
+        <<: *style_defaults
+        temperature: 0.85
+        examples: *ex_propaganda
+
+      prejudices:
+        <<: *style_defaults
+        temperature: 0.85
+        examples: *ex_prejudices
+
+      partisan:
+        <<: *style_defaults
+        temperature: 0.85
+        examples: *ex_partisan
+
+      derogatory:
+        <<: *style_defaults
+        temperature: 0.85
+        examples: *ex_derogatory
+
+      exaggerated:
+        <<: *style_defaults
+        temperature: 0.9
+        examples: *ex_exaggerated
