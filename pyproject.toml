@@ -49,6 +49,7 @@ xlsxwriter = "^3.2.3"
 langchain = "*"
 tensorflow = "^2.16.0"
 tf-keras = "^2.19.0"
+hf-xet = "^1.1.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
