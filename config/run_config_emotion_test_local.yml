@@ -22,7 +22,7 @@ train:
   focal_loss_gamma: 2.0 # (only used if loss is focal)
 
 encoder_model: 
-  name: "MarieAngeA13/Sentiment-Analysis-BERT" # roberta-large #sentence-transformers/all-MiniLM-L12-v2 #"modernbert-large"
+  name: "j-hartmann/emotion-english-roberta-large" # roberta-large #sentence-transformers/all-MiniLM-L12-v2 #"modernbert-large"
   TOKENIZERS_PARALLELISM: false # Supress tokenizin in parallel because we will fork our process later when dataloader is created
   add_special_tokens: true
   padding: "max_length"
@@ -33,7 +33,7 @@ encoder_model:
   r2l: false # Tokenization (True, False)
   max_length: 128
   batch_size: 20
-  hidden_dim: 768
+  hidden_dim: 1024
   freeze_encoder: null # whole, "first_5_layers"
   dropout_ratio: 0.1
   mlp_dim: 256
