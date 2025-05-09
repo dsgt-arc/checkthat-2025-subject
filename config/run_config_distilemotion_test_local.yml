@@ -23,7 +23,7 @@ train:
 
 encoder_model: 
   name: "j-hartmann/emotion-english-distilroberta-base" # roberta-large #sentence-transformers/all-MiniLM-L12-v2 #"modernbert-large"
-  TOKENIZERS_PARALLELISM: false # Supress tokenizin in parallel because we will fork our process later when dataloader is created
+  TOKENIZERS_PARALLELISM: false # Suppress tokenizing in parallel to avoid issues when forking processes for the dataloader
   add_special_tokens: true
   padding: "max_length"
   truncation: true
