@@ -8,9 +8,8 @@ data:
 
 train:
   train_test_split: 0.8
-  batch_size: 100 # used for 02-nli
-  dataloader_num_workers: 0 # Number of subprocesses to use for data loading
-  seed: 564
+  batch_size: 100
+  seed: 346564
   epochs: 10
   learning_rate: 0.00002
   eps: 0.00000001
@@ -20,9 +19,10 @@ train:
   step_per: "epoch" # ("epoch", "batch", "venktesh" -> no steps)
   loss: "cross_entropy" # ("cross_entropy", "focal")
   focal_loss_gamma: 2.0 # (only used if loss is focal)
+  dataloader_num_workers: 0 # Number of subprocesses to use for data loading
 
-encoder_model: 
-  name: "j-hartmann/emotion-english-roberta-large" # roberta-large #sentence-transformers/all-MiniLM-L12-v2 #"modernbert-large"
+encoder_model:
+  name: "answerdotai/modernbert-large"
   TOKENIZERS_PARALLELISM: false # Suppress tokenizing in parallel because we will fork our process later when dataloader is created
   add_special_tokens: true
   padding: "max_length"

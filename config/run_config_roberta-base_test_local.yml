@@ -10,9 +10,9 @@ train:
   train_test_split: 0.8
   batch_size: 100 # used for 02-nli
   dataloader_num_workers: 0 # Number of subprocesses to use for data loading
-  seed: 564
+  seed: 42
   epochs: 10
-  learning_rate: 0.00002
+  learning_rate: 0.0001
   eps: 0.00000001
   early_stopping_patience: 2
   rounding_metrics: 4
@@ -22,7 +22,7 @@ train:
   focal_loss_gamma: 2.0 # (only used if loss is focal)
 
 encoder_model: 
-  name: "j-hartmann/emotion-english-roberta-large" # roberta-large #sentence-transformers/all-MiniLM-L12-v2 #"modernbert-large"
+  name: "roberta-base"
   TOKENIZERS_PARALLELISM: false # Suppress tokenizing in parallel because we will fork our process later when dataloader is created
   add_special_tokens: true
   padding: "max_length"
@@ -33,7 +33,7 @@ encoder_model:
   r2l: false # Tokenization (True, False)
   max_length: 128
   batch_size: 20
-  hidden_dim: 1024
+  hidden_dim: 768
   freeze_encoder: null # whole, "first_5_layers"
   dropout_ratio: 0.1
   mlp_dim: 256
